@@ -5,3 +5,5 @@ spring:
   mvc:
     servlet:
       path: /api/v1
+  cache:
+    type: redis

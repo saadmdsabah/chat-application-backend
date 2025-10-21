@@ -9,6 +9,9 @@ import com.saadsabahuddin.chat_application_backend.repository.RoomRepository;
 import com.saadsabahuddin.chat_application_backend.repository.UserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,12 @@ public class RoomService {
   private final RoomRepository roomRepository;
   private final UserRepository userRepository;
 
+  @Caching(
+    evict = {
+      @CacheEvict(value = "joinedRooms", key = "#userName"),
+      @CacheEvict(value = "createdRooms", key = "#userName"),
+    }
+  )
   public Room createRoom(String roomId, String userName, boolean isPrivate) {
     Room room = roomRepository.findByRoomId(roomId).orElse(null);
     if (room != null) {
@@ -44,6 +53,7 @@ public class RoomService {
     return savedRoom;
   }
 
+  @CacheEvict(value = "joinedRooms", key = "#userName")
   public Room joinRoom(String roomId, String userName) {
     Room room = roomRepository
       .findByRoomId(roomId)
@@ -84,6 +94,7 @@ public class RoomService {
     return messages.subList(start, end);
   }
 
+  @Cacheable(value = "checkIfEntryPossible", key = "#roomId + '_' + #userName")
   public Boolean checkIfEntryPossibleForUser(String roomId, String userName) {
     User user = userRepository
       .findByUserName(userName)
@@ -97,6 +108,7 @@ public class RoomService {
     return false;
   }
 
+  @Cacheable(value = "roomCreater", key = "#roomId")
   public String getRoomCreater(String roomId) {
     Room room = roomRepository
       .findByRoomId(roomId)

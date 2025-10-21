@@ -1,5 +1,6 @@
 package com.saadsabahuddin.chat_application_backend.entities;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +16,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Invitation {
+public class Invitation implements Serializable {
 
   @Id
   private String id;

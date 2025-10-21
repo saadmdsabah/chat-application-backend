@@ -8,6 +8,7 @@ import com.saadsabahuddin.chat_application_backend.repository.UserRepository;
 import com.saadsabahuddin.chat_application_backend.utils.JwtUtils;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -48,6 +49,7 @@ public class UserServices {
     throw new UnauthenticatedException("Invalid Credentials");
   }
 
+  @Cacheable(value = "createdRooms", key = "#userName")
   public List<String> getCreatedRooms(String userName) {
     User user = userRepo
       .findByUserName(userName)
@@ -55,6 +57,7 @@ public class UserServices {
     return user.getCreatedRooms();
   }
 
+  @Cacheable(value = "joinedRooms", key = "#userName")
   public List<String> getJoinedRooms(String userName) {
     User user = userRepo
       .findByUserName(userName)

@@ -9,6 +9,9 @@ import com.saadsabahuddin.chat_application_backend.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,18 @@ public class InvitationService {
   private final InvitationRepository invitationRepository;
   private final UserRepository userRepository;
 
+  @Caching(
+    evict = {
+      @CacheEvict(
+        value = "invitationsBySender",
+        key = "#createInvitationDto.getSender()"
+      ),
+      @CacheEvict(
+        value = "invitationsByReceiver",
+        key = "#createInvitationDto.getReceiver()"
+      ),
+    }
+  )
   public Invitation createInvitation(CreateInvitationDto createInvitationDto) {
     if (
       createInvitationDto.getReceiver().equals(createInvitationDto.getSender())
@@ -57,6 +72,26 @@ public class InvitationService {
     );
   }
 
+  @Caching(
+    evict = {
+      @CacheEvict(
+        value = "invitationsBySender",
+        key = "#updateInvitationStatusDto.getSender()"
+      ),
+      @CacheEvict(
+        value = "invitationsByReceiver",
+        key = "#updateInvitationStatusDto.getReceiver()"
+      ),
+      @CacheEvict(
+        value = "checkIfEntryPossible",
+        key = "#updateInvitationStatusDto.getRoomId() + '_' + #updateInvitationStatusDto.getSender()"
+      ),
+      @CacheEvict(
+        value = "joinedRooms",
+        key = "#updateInvitationStatusDto.getSender()"
+      ),
+    }
+  )
   public Boolean updateStatusOfInvitation(
     UpdateInvitationStatusDto updateInvitationStatusDto
   ) {
@@ -96,12 +131,14 @@ public class InvitationService {
     return false;
   }
 
+  @Cacheable(value = "invitationsBySender", key = "#userName")
   public List<Invitation> getAllInvitationsForASender(String userName) {
     return invitationRepository
       .findBySender(userName)
       .orElseThrow(() -> new UsernameNotFoundException("User not found"));
   }
 
+  @Cacheable(value = "invitationsByReceiver", key = "#userName")
   public List<Invitation> getAllInvitationsForAReciever(String userName) {
     return invitationRepository
       .findByReceiver(userName)
