@@ -1,0 +1,7 @@
+spring:
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI}
+  mvc:
+    servlet:
+      path: /api/v1
