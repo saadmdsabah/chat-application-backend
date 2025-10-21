@@ -26,29 +26,65 @@ public class InvitationController {
   public ResponseEntity<SuccessResponseDto<Invitation>> createInvitation(
     @RequestBody CreateInvitationDto createInvitationDto
   ) {
-    return invitationService.createInvitation(createInvitationDto);
+    Invitation invitation = invitationService.createInvitation(
+      createInvitationDto
+    );
+    return ResponseEntity
+      .ok()
+      .body(
+        new SuccessResponseDto<Invitation>(
+          invitation,
+          "Invitation created successfully"
+        )
+      );
   }
 
   @PostMapping("/updateStatus")
   public ResponseEntity<SuccessResponseDto<Boolean>> updateStatusOfInvitation(
     @RequestBody UpdateInvitationStatusDto updateInvitationStatusDto
   ) {
-    return invitationService.updateStatusOfInvitation(
+    Boolean updateStatusOfInvitation = invitationService.updateStatusOfInvitation(
       updateInvitationStatusDto
     );
+    return ResponseEntity
+      .ok()
+      .body(
+        new SuccessResponseDto<>(
+          updateStatusOfInvitation,
+          "Invitation accepted successfully"
+        )
+      );
   }
 
   @GetMapping("/sender/{userName}")
   public ResponseEntity<SuccessResponseDto<List<Invitation>>> getAllInvitationsForASender(
     @PathVariable String userName
   ) {
-    return invitationService.getAllInvitationsForASender(userName);
+    List<Invitation> invitations = invitationService.getAllInvitationsForASender(
+      userName
+    );
+    return ResponseEntity
+      .ok()
+      .body(
+        new SuccessResponseDto<List<Invitation>>(
+          invitations,
+          "Found Invitations Successfully"
+        )
+      );
   }
 
   @GetMapping("/receiver/{userName}")
   public ResponseEntity<SuccessResponseDto<List<Invitation>>> getAllInvitationsForAReciever(
     @PathVariable String userName
   ) {
-    return invitationService.getAllInvitationsForAReciever(userName);
+    List<Invitation> invitations = invitationService.getAllInvitationsForAReciever(userName);
+    return ResponseEntity
+      .ok()
+      .body(
+        new SuccessResponseDto<List<Invitation>>(
+          invitations,
+          "Found Invitations Successfully"
+        )
+      );
   }
 }

@@ -5,6 +5,7 @@ import com.saadsabahuddin.chat_application_backend.dto.SuccessResponseDto;
 import com.saadsabahuddin.chat_application_backend.entities.User;
 import com.saadsabahuddin.chat_application_backend.service.UserServices;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,7 +23,12 @@ public class AuthController {
   public ResponseEntity<SuccessResponseDto<User>> registerUser(
     @RequestBody User user
   ) {
-    return userServices.register(user);
+    User createdUser = userServices.register(user);
+    return ResponseEntity
+      .status(HttpStatus.CREATED)
+      .body(
+        new SuccessResponseDto<User>(createdUser, "User Created Successfully")
+      );
   }
 
   @PostMapping("/login")
@@ -30,6 +36,11 @@ public class AuthController {
     @RequestBody LoginDto loginDto
   ) {
     User user = new User(loginDto.getUserName(), loginDto.getPassword());
-    return userServices.verify(user);
+    String token = userServices.verify(user);
+    return ResponseEntity
+      .ok()
+      .body(
+        new SuccessResponseDto<String>(token, "User Logged In Successfully")
+      );
   }
 }

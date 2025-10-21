@@ -7,6 +7,7 @@ import com.saadsabahuddin.chat_application_backend.entities.Room;
 import com.saadsabahuddin.chat_application_backend.service.RoomService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,11 +29,14 @@ public class RoomController {
     @PathVariable String roomId,
     @RequestBody CreateRoomDto createRoomDto
   ) {
-    return roomService.createRoom(
+    Room room = roomService.createRoom(
       roomId,
       createRoomDto.getUserName(),
       createRoomDto.isPrivateRoom()
     );
+    return ResponseEntity
+      .status(HttpStatus.CREATED)
+      .body(new SuccessResponseDto<Room>(room, "Room Created Successfully"));
   }
 
   @GetMapping("/{roomId}")
@@ -40,7 +44,10 @@ public class RoomController {
     @PathVariable String roomId,
     @RequestParam String userName
   ) {
-    return roomService.joinRoom(roomId, userName);
+    Room room = roomService.joinRoom(roomId, userName);
+    return ResponseEntity
+      .ok()
+      .body(new SuccessResponseDto<Room>(room, "Found Room Successfully"));
   }
 
   @GetMapping("/{roomId}/messages")
@@ -50,7 +57,20 @@ public class RoomController {
     @RequestParam(defaultValue = "10", required = false) int size,
     @RequestParam String userName
   ) {
-    return roomService.getMessages(roomId, page, size, userName);
+    List<Message> messages = roomService.getMessages(
+      roomId,
+      page,
+      size,
+      userName
+    );
+    return ResponseEntity
+      .ok()
+      .body(
+        new SuccessResponseDto<List<Message>>(
+          messages,
+          "Found Messages Successfully"
+        )
+      );
   }
 
   @GetMapping("/entryPossible/{roomId}")
@@ -58,13 +78,29 @@ public class RoomController {
     @PathVariable String roomId,
     @RequestParam String userName
   ) {
-    return roomService.checkIfEntryPossibleForUser(roomId, userName);
+    Boolean checkIfEntryPossibleForUser = roomService.checkIfEntryPossibleForUser(
+      roomId,
+      userName
+    );
+    return ResponseEntity
+      .ok()
+      .body(
+        new SuccessResponseDto<Boolean>(
+          checkIfEntryPossibleForUser,
+          "Entry Possible"
+        )
+      );
   }
 
   @GetMapping("/{roomId}/creater")
   public ResponseEntity<SuccessResponseDto<String>> getRoomCreater(
     @PathVariable String roomId
   ) {
-    return roomService.getRoomCreater(roomId);
+    String roomCreater = roomService.getRoomCreater(roomId);
+    return ResponseEntity
+      .ok()
+      .body(
+        new SuccessResponseDto<String>(roomCreater, "Fetched Successfully")
+      );
   }
 }

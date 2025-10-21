@@ -1,6 +1,5 @@
 package com.saadsabahuddin.chat_application_backend.service;
 
-import com.saadsabahuddin.chat_application_backend.dto.SuccessResponseDto;
 import com.saadsabahuddin.chat_application_backend.dto.UserDto;
 import com.saadsabahuddin.chat_application_backend.entities.User;
 import com.saadsabahuddin.chat_application_backend.exceptions.UnauthenticatedException;
@@ -9,8 +8,6 @@ import com.saadsabahuddin.chat_application_backend.repository.UserRepository;
 import com.saadsabahuddin.chat_application_backend.utils.JwtUtils;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,21 +24,17 @@ public class UserServices {
   private final AuthenticationManager authenticationManager;
   private final JwtUtils jwtService;
 
-  public ResponseEntity<SuccessResponseDto<User>> register(User user) {
+  public User register(User user) {
     User existing = userRepo.findByUserName(user.getUsername()).orElse(null);
     if (existing != null) {
       throw new UserExistsException("Username already taken!");
     }
     user.setUserPassword(bCrypt.encode(user.getPassword()));
     User createdUser = userRepo.save(user);
-    return ResponseEntity
-      .status(HttpStatus.CREATED)
-      .body(
-        new SuccessResponseDto<User>(createdUser, "User Created Successfully")
-      );
+    return createdUser;
   }
 
-  public ResponseEntity<SuccessResponseDto<String>> verify(User user) {
+  public String verify(User user) {
     Authentication authentication = authenticationManager.authenticate(
       new UsernamePasswordAuthenticationToken(
         user.getUsername(),
@@ -50,63 +43,34 @@ public class UserServices {
     );
     if (authentication.isAuthenticated()) {
       String token = jwtService.generateToken(user);
-      return ResponseEntity
-        .ok()
-        .body(
-          new SuccessResponseDto<String>(token, "User Logged In Successfully")
-        );
+      return token;
     }
     throw new UnauthenticatedException("Invalid Credentials");
   }
 
-  public ResponseEntity<SuccessResponseDto<List<String>>> getCreatedRooms(
-    String userName
-  ) {
+  public List<String> getCreatedRooms(String userName) {
     User user = userRepo
       .findByUserName(userName)
       .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-    return ResponseEntity
-      .ok()
-      .body(
-        new SuccessResponseDto<List<String>>(
-          user.getCreatedRooms(),
-          "Created Rooms"
-        )
-      );
+    return user.getCreatedRooms();
   }
 
-  public ResponseEntity<SuccessResponseDto<List<String>>> getJoinedRooms(
-    String userName
-  ) {
+  public List<String> getJoinedRooms(String userName) {
     User user = userRepo
       .findByUserName(userName)
       .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-    return ResponseEntity
-      .ok()
-      .body(
-        new SuccessResponseDto<List<String>>(
-          user.getJoinedRooms(),
-          "Created Rooms"
-        )
-      );
+    return user.getJoinedRooms();
   }
 
-  public ResponseEntity<SuccessResponseDto<UserDto>> getUser(String userName) {
+  public UserDto getUser(String userName) {
     User user = userRepo
       .findByUserName(userName)
       .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-    return ResponseEntity
-      .ok()
-      .body(
-        new SuccessResponseDto<UserDto>(
-          UserDto
-            .builder()
-            .userId(user.getUserId())
-            .userName(user.getUsername())
-            .aboutUser(user.getAboutUser())
-            .build(),
-          "Found User Successfully"
-        )
-      );
+    return UserDto
+      .builder()
+      .userId(user.getUserId())
+      .userName(user.getUsername())
+      .aboutUser(user.getAboutUser())
+      .build();
   }
 }

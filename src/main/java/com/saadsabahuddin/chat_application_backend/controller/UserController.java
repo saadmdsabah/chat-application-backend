@@ -20,20 +20,31 @@ public class UserController {
   public ResponseEntity<SuccessResponseDto<List<String>>> getCreatedRooms(
     @PathVariable String userName
   ) {
-    return userServices.getCreatedRooms(userName);
+    List<String> createdRooms = userServices.getCreatedRooms(userName);
+    return ResponseEntity
+      .ok()
+      .body(
+        new SuccessResponseDto<List<String>>(createdRooms, "Created Rooms")
+      );
   }
 
   @GetMapping("/{userName}/joinedRooms")
   public ResponseEntity<SuccessResponseDto<List<String>>> getJoinedRooms(
     @PathVariable String userName
   ) {
-    return userServices.getJoinedRooms(userName);
+    List<String> joinedRooms = userServices.getJoinedRooms(userName);
+    return ResponseEntity
+      .ok()
+      .body(new SuccessResponseDto<List<String>>(joinedRooms, "Created Rooms"));
   }
 
   @GetMapping("/user/{userName}")
   public ResponseEntity<SuccessResponseDto<UserDto>> getMethodName(
     @PathVariable String userName
   ) {
-    return userServices.getUser(userName);
+    UserDto user = userServices.getUser(userName);
+    return ResponseEntity
+      .ok()
+      .body(new SuccessResponseDto<UserDto>(user, "Found User Successfully"));
   }
 }
